@@ -5,10 +5,7 @@
 
 import os
 import matplotlib
-if os.path.exists("/Users/yulia"):
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
+
 import matplotlib.pyplot
 import matplotlib.pyplot as plt
 
@@ -95,7 +92,7 @@ class PhysioNet(object):
 			data_file = self.training_file
 		else:
 			data_file = self.test_file
-		
+
 		if device == torch.device("cpu"):
 			self.data = torch.load(os.path.join(self.processed_folder, data_file), map_location='cpu')
 			self.labels = torch.load(os.path.join(self.processed_folder, self.label_file), map_location='cpu')
@@ -201,10 +198,10 @@ class PhysioNet(object):
 
 			torch.save(
 				patients,
-				os.path.join(self.processed_folder, 
+				os.path.join(self.processed_folder,
 					filename.split('.')[0] + "_" + str(self.quantization) + '.pt')
 			)
-				
+
 		print('Done!')
 
 	def _check_exists(self):
@@ -212,7 +209,7 @@ class PhysioNet(object):
 			filename = url.rpartition('/')[2]
 
 			if not os.path.exists(
-				os.path.join(self.processed_folder, 
+				os.path.join(self.processed_folder,
 					filename.split('.')[0] + "_" + str(self.quantization) + '.pt')
 			):
 				return False
@@ -266,7 +263,7 @@ class PhysioNet(object):
 
 		mask = mask[:, non_zero_idx]
 		data = data[:, non_zero_idx]
-		
+
 		params_non_zero = [self.params[i] for i in non_zero_idx]
 		params_dict = {k: i for i, k in enumerate(params_non_zero)}
 
@@ -284,7 +281,7 @@ class PhysioNet(object):
 			tp_cur_param = timesteps[tp_mask == 1.]
 			data_cur_param = data[tp_mask == 1., param_id]
 
-			ax_list[i // n_col, i % n_col].plot(tp_cur_param.numpy(), data_cur_param.numpy(),  marker='o') 
+			ax_list[i // n_col, i % n_col].plot(tp_cur_param.numpy(), data_cur_param.numpy(),  marker='o')
 			ax_list[i // n_col, i % n_col].set_title(param)
 
 		fig.tight_layout()
@@ -292,7 +289,7 @@ class PhysioNet(object):
 		plt.close(fig)
 
 
-def variable_time_collate_fn(batch, args, device = torch.device("cpu"), data_type = "train", 
+def variable_time_collate_fn(batch, args, device = torch.device("cpu"), data_type = "train",
 	data_min = None, data_max = None):
 	"""
 	Expects a batch of time series data in the form of (record_id, tt, vals, mask, labels) where
@@ -313,13 +310,13 @@ def variable_time_collate_fn(batch, args, device = torch.device("cpu"), data_typ
 	offset = 0
 	combined_vals = torch.zeros([len(batch), len(combined_tt), D]).to(device)
 	combined_mask = torch.zeros([len(batch), len(combined_tt), D]).to(device)
-	
+
 	combined_labels = None
 	N_labels = 1
 
 	combined_labels = torch.zeros(len(batch), N_labels) + torch.tensor(float('nan'))
 	combined_labels = combined_labels.to(device = device)
-	
+
 	for b, (record_id, tt, vals, mask, labels) in enumerate(batch):
 		tt = tt.to(device)
 		vals = vals.to(device)
@@ -336,14 +333,14 @@ def variable_time_collate_fn(batch, args, device = torch.device("cpu"), data_typ
 		if labels is not None:
 			combined_labels[b] = labels
 
-	combined_vals, _, _ = utils.normalize_masked_data(combined_vals, combined_mask, 
+	combined_vals, _, _ = utils.normalize_masked_data(combined_vals, combined_mask,
 		att_min = data_min, att_max = data_max)
 
 	if torch.max(combined_tt) != 0.:
 		combined_tt = combined_tt / torch.max(combined_tt)
-		
+
 	data_dict = {
-		"data": combined_vals, 
+		"data": combined_vals,
 		"time_steps": combined_tt,
 		"mask": combined_mask,
 		"labels": combined_labels}

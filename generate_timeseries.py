@@ -8,10 +8,7 @@ from __future__ import absolute_import, division
 from __future__ import print_function
 import os
 import matplotlib
-if os.path.exists("/Users/yulia"):
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
+
 
 import numpy as np
 import numpy.random as npr
@@ -31,7 +28,7 @@ def get_next_val(init, t, tmin, tmax, final = None):
 	return val
 
 
-def generate_periodic(time_steps, init_freq, init_amplitude, starting_point, 
+def generate_periodic(time_steps, init_freq, init_amplitude, starting_point,
 	final_freq = None, final_amplitude = None, phi_offset = 0.):
 
 	tmin = time_steps.min()
@@ -87,16 +84,16 @@ class TimeSeries:
 
 
 class Periodic_1d(TimeSeries):
-	def __init__(self, device = torch.device("cpu"), 
+	def __init__(self, device = torch.device("cpu"),
 		init_freq = 0.3, init_amplitude = 1.,
-		final_amplitude = 10., final_freq = 1., 
+		final_amplitude = 10., final_freq = 1.,
 		z0 = 0.):
 		"""
 		If some of the parameters (init_freq, init_amplitude, final_amplitude, final_freq) is not provided, it is randomly sampled.
 		For now, all the time series share the time points and the starting point.
 		"""
 		super(Periodic_1d, self).__init__(device)
-		
+
 		self.init_freq = init_freq
 		self.init_amplitude = init_amplitude
 		self.final_amplitude = final_amplitude
@@ -106,7 +103,7 @@ class Periodic_1d(TimeSeries):
 	def sample_traj(self, time_steps, n_samples = 1, noise_weight = 1.,
 		cut_out_section = None):
 		"""
-		Sample periodic functions. 
+		Sample periodic functions.
 		"""
 		traj_list = []
 		for i in range(n_samples):
@@ -120,8 +117,8 @@ class Periodic_1d(TimeSeries):
 
 			noisy_z0 = self.z0 + np.random.normal(loc=0., scale=0.1)
 
-			traj = generate_periodic(time_steps, init_freq = init_freq, 
-				init_amplitude = init_amplitude, starting_point = noisy_z0, 
+			traj = generate_periodic(time_steps, init_freq = init_freq,
+				init_amplitude = init_amplitude, starting_point = noisy_z0,
 				final_amplitude = final_amplitude, final_freq = final_freq)
 
 			# Cut the time dimension
@@ -137,4 +134,3 @@ class Periodic_1d(TimeSeries):
 
 		traj_list = self.add_noise(traj_list, time_steps, noise_weight)
 		return traj_list
-
