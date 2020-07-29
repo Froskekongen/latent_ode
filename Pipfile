@@ -12,6 +12,7 @@ torchdiffeq = "*"
 pandas = "*"
 scikit-learn = "*"
 umap-learn = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
